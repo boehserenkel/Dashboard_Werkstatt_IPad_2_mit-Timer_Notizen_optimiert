@@ -5,14 +5,12 @@
 <title>Dashboard iPad 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
+  /* Hintergrundbild komplett, Bild muss im gleichen Ordner liegen */
   body {
-    margin: 0; 
-    padding: 0; 
-    font-family: sans-serif; 
-    text-align: center; 
-    background: url('Werkstatt.jpg') no-repeat center center fixed; 
+    margin: 0; padding: 0; font-family: sans-serif; text-align: center;
+    background: url('Werkstatt.jpg') no-repeat center center fixed;
     background-size: cover;
-    color: #222;
+    color: #000;
   }
   #digitalClock {
     font-size: 2.5em;
@@ -43,46 +41,38 @@
   #timer {
     font-size: 1.8em;
     margin-top: 10px;
-    color: #333;
+    color: red;
     font-family: monospace;
   }
   .calendar {
     max-width: 320px;
-    margin: 20px auto;
-    background: rgba(255,255,255,0.85);
+    margin: 0 auto 30px auto;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px 20px;
     border-radius: 10px;
-    padding: 10px 20px;
     box-sizing: border-box;
     font-family: monospace;
-    color: #222;
+    color: #000;
+    user-select: none;
   }
-  .calendar pre {
-    margin: 0;
-    line-height: 1.4;
-  }
-  mark.highlight-day {
+  .calendar mark.highlight-day {
     background-color: #4CAF50;
     color: white;
-    font-weight: bold;
     border-radius: 3px;
     padding: 0 4px;
   }
   .notes-section {
     max-width: 320px;
-    margin: 20px auto 40px auto;
-    background: rgba(255,255,255,0.85);
-    border-radius: 10px;
-    padding: 10px 20px;
-    box-sizing: border-box;
+    margin: 0 auto 30px auto;
   }
-  .notes-section textarea {
+  #notes {
     width: 100%;
     height: 120px;
     font-size: 1em;
-    font-family: sans-serif;
+    padding: 8px;
+    box-sizing: border-box;
     border-radius: 6px;
     border: 1px solid #ccc;
-    padding: 8px;
     resize: vertical;
   }
 </style>
@@ -102,8 +92,8 @@
 <div id="timer">00:00</div>
 
 <div class="calendar">
-  <strong>Kalender</strong>
-  <pre id="calendarContent">
+  <strong>Kalender (aktueller Tag hervorgehoben)</strong>
+  <pre id="calendarPre">
 Mo Di Mi Do Fr Sa So
  1  2  3  4  5  6  7
  8  9 10 11 12 13 14
@@ -114,12 +104,13 @@ Mo Di Mi Do Fr Sa So
 </div>
 
 <div class="notes-section">
-  <strong>Notizen</strong><br/>
-  <textarea id="notes" placeholder="Hier kannst du Notizen eingeben..."></textarea>
+  <strong>Notizen:</strong><br/>
+  <textarea id="notes" placeholder="Hier Notizen eingeben..."></textarea>
 </div>
 
 <script>
 window.onload = function() {
+  // Uhr
   var canvas = document.getElementById('clockCanvas');
   var ctx = canvas.getContext('2d');
   var radius = canvas.height / 2;
@@ -239,28 +230,21 @@ window.onload = function() {
     return time < 10 ? '0' + time : time;
   }
 
-  // Kalender aktueller Tag markieren
+  // Kalender - aktueller Tag wird markiert
   function highlightToday() {
-    var calendarPre = document.getElementById('calendarContent');
+    var calendarPre = document.getElementById('calendarPre');
     var now = new Date();
     var day = now.getDate();
 
-    // Ursprünglichen Kalendertext
-    var text = 
-`Mo Di Mi Do Fr Sa So
- 1  2  3  4  5  6  7
- 8  9 10 11 12 13 14
-15 16 17 18 19 20 21
-22 23 24 25 26 27 28
-29 30 31`;
-
-    // Ersetze den Tag mit einer Hervorhebung via <mark> Tag
-    var lines = text.split('\n');
-    for (var i = 0; i < lines.length; i++) {
-      var regex = new RegExp('\\b' + day + '\\b');
-      lines[i] = lines[i].replace(regex, '<mark class="highlight-day">' + day + '</mark>');
+    var lines = calendarPre.innerText.split('\n');
+    // Ersetze die Zeile mit den Tagen
+    for (var i=0; i < lines.length; i++) {
+      if (lines[i].includes(day.toString())) {
+        var regex = new RegExp('\\b' + day + '\\b');
+        lines[i] = lines[i].replace(regex, '<mark class="highlight-day">' + day + '</mark>');
+        break;
+      }
     }
-
     calendarPre.innerHTML = lines.join('\n');
   }
 
@@ -271,4 +255,3 @@ window.onload = function() {
 
 </body>
 </html>
-
