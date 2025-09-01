@@ -13,7 +13,6 @@
     font-family: sans-serif; text-align: center;
     background: url('Werkstatt.jpg') no-repeat center center fixed;
     background-size: cover;
-    -webkit-user-select: none;
   }
   #digitalClock {
     font-size: 2.5em;
@@ -50,33 +49,11 @@
   .calendar {
     max-width: 90vw;
     margin: 0 auto 20px auto;
-  }
-  .calendar pre {
-    white-space: pre-wrap;
-    word-break: break-word;
+    background: rgba(255,255,255,0.8);
+    padding: 10px;
+    border-radius: 10px;
     font-family: monospace;
-    max-width: 90vw;
-    overflow-x: auto;
-    background: rgba(255,255,255,0.8);
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 1.2em;
-    margin: 0 auto;
-  }
-  .notes-section {
-    max-width: 90vw;
-    margin: 0 auto 20px auto;
-    background: rgba(255,255,255,0.8);
-    padding: 10px;
-    border-radius: 10px;
-  }
-  textarea {
-    width: 100%;
-    height: 100px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    resize: none;
+    white-space: pre;
   }
 </style>
 </head>
@@ -89,22 +66,13 @@
   <button onclick="startTimer(1)">1 Minute</button>
   <button onclick="startTimer(2)">2 Minuten</button>
   <button onclick="startTimer(5)">5 Minuten</button>
-  <button onclick="startTimer(10)">10 Minuten</button>
-  <button onclick="startTimer(15)">15 Minuten</button>
 </div>
 <div id="timer">00:00</div>
 
-<div class="calendar">
-  <strong>Kalender</strong>
-  <pre id="calendarDisplay"></pre>
-</div>
-
-<div class="notes-section">
-  <strong>Notizen</strong><br />
-  <textarea placeholder="Hier Notizen eingeben..."></textarea>
-</div>
+<div class="calendar" id="calendarDisplay"></div>
 
 <script>
+(() => {
   const canvas = document.getElementById('clockCanvas');
   const ctx = canvas.getContext('2d');
   const radius = canvas.height / 2;
@@ -183,10 +151,11 @@
     ctx.stroke();
   }
 
+  // Starte Clock Animation
   setInterval(drawClock, 1000);
   drawClock();
 
-  // Timer
+  // Timer-Funktion
   let countdown;
   let isTimerRunning = false;
 
@@ -201,7 +170,7 @@
     isTimerRunning = true;
     updateTimerDisplay(totalSeconds);
 
-    countdown = setInterval(function () {
+    countdown = setInterval(() => {
       totalSeconds--;
       updateTimerDisplay(totalSeconds);
 
@@ -224,19 +193,63 @@
     return time < 10 ? '0' + time : time;
   }
 
-  // Kalender mit aktuellem Tag hervorheben und Monat dynamisch anzeigen
-  (function updateCalendar() {
+  // Kalender rendern
+  function renderCalendar() {
     const calendar = document.getElementById('calendarDisplay');
     const now = new Date();
     const year = now.getFullYear();
-    const month = now.getMonth(); // 0-basiert
+    const month = now.getMonth();
     const today = now.getDate();
 
-    // Monat und erster Wochentag
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startWeekday = firstDay.getDay(); // 0 = Sonntag
+    const startWeekday = firstDay.getDay(); // 0=Sonntag
 
-    // Wochen-Header Mo-So (deutsch)
     const weekHeader = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+
+    let weeks = [];
+    let week = [];
+
+    // Startoffset anpassen (Mo=0)
+    let dayOffset = (startWeekday === 0) ? 6 : startWeekday - 1;
+
+    // Leere Tage am Anfang
+    for(let i=0; i<dayOffset; i++) {
+      week.push('  ');
+    }
+
+    for(let d=1; d<=daysInMonth; d++) {
+      let dayStr = (d < 10 ? ' ' + d : d.toString());
+      if(d === today) {
+        dayStr = '[' + (d < 10 ? ' ' + d : d) + ']'; // Heute markieren
+      }
+      week.push(dayStr);
+      if(week.length === 7) {
+        weeks.push(week);
+        week = [];
+      }
+    }
+
+    if(week.length > 0) {
+      while(week.length < 7) {
+        week.push('  ');
+      }
+      weeks.push(week);
+    }
+
+    let calendarText = weekHeader.join(' ') + '\n';
+    weeks.forEach(w => {
+      calendarText += w.join(' ') + '\n';
+    });
+
+    calendar.textContent = calendarText;
+  }
+
+  renderCalendar();
+
+})();
+</script>
+
+</body>
+</html>
