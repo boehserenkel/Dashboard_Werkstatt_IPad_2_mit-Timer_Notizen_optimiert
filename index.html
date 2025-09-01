@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard für iPad 2</title>
+
+  <!-- Optimierung für iPad 2 und Web-App Modus -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="apple-mobile-web-app-title" content="Dashboard" />
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: url('Werkstatt.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #222;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Anpassung des Canvas für das iPad 2 */
+    canvas {
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      width: 80%;  /* Dynamische Breite */
+      height: auto;  /* Dynamische Höhe */
+      max-width: 400px; /* Maximale Größe */
+      max-height: 400px; /* Maximale Höhe */
+      margin-top: 10px;
+    }
+
+    #digitalClock {
+      font-size: 3em; /* Größer, gut lesbar auf dem iPad 2 */
+      font-family: monospace;
+      margin: 10px 0;
+      color: red;
+    }
+
+    .section {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+      display: inline-block;
+      max-width: 95vw;
+      word-wrap: break-word; /* Damit lange Wörter umbrochen werden */
+    }
+
+    .calendar {
+      font-family: monospace;
+      white-space: pre;
+      font-size: 1.5em; /* Größere Schrift für den Kalender */
+    }
+
+    .notes {
+      margin-top: 20px;
+      font-size: 1.4em; /* Größere Schrift für Notizen */
+      color: #333;
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    /* Timer-Buttons */
+    .timer-buttons {
+      margin-top: 20px;
+    }
+
+    .timer-buttons button {
+      font-size: 1.5em;  /* Größere Buttons */
+      padding: 12px;
+      margin: 12px;
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .timer-buttons button:hover {
+      background-color: #e64a19;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ANALOGE + DIGITALE UHR -->
+  <canvas id="clockCanvas" width="300" height="300"></canvas>
+  <div id="digitalClock">--:--:--</div>
+
+  <!-- KALENDER -->
+  <div class="section calendar">
+    <div id="dateToday"></div>
+    <div id="calendarOutput"></div>
+  </div>
+
+  <!-- NOTIZEN -->
+  <div class="section notes">
+    <strong>Notizen:</strong>
+    <p>• Heute ist ein guter Tag für Fortschritt. 🎯</p>
+    <p>• Neue Projekte starten! 🚀</p>
+    <p>• Denke daran, immer positiv zu bleiben. ✨</p>
+  </div>
+
+  <!-- Timer Buttons -->
+  <div class="section timer-buttons">
+    <button onclick="startTimer(5)">5 Minuten</button>
+    <button onclick="startTimer(10)">10 Minuten</button>
+    <button onclick="startTimer(15)">15 Minuten</button>
+  </div>
+
+  <script>
+    // === ANALOGE + DIGITALE UHR ===
+    (function(){
+      var canvas = document.getElementById("clockCanvas");
+      var ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      var radius = canvas.height / 2;
+      ctx.translate(radius, radius);
+      radius = radius * 0.90;
+
+      function drawClock() {
+        drawFace(ctx, radius);
+        drawNumbers(ctx, radius);
+        drawTime(ctx, radius);
+      }
+
+      function drawFace(ctx, radius) {
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = radius * 0.05;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.05, 0, 2 * Math.PI);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+      }
+
+      function drawNumbers(ctx, radius) {
+        var ang, num;
+        ctx.font = radius * 0.18 + "px Arial";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        for (num = 1; num <= 12; num++) {
+          ang = num * Math.PI / 6;
+          ctx.rotate(ang);
+          ctx.translate(0, -radius * 0.85);
+          ctx.rotate(-ang);
+          ctx.fillText(num.toString(), 0, 0);
+          ctx.rotate(ang);
+          ctx.translate(0, radius * 0.85);
+          ctx.rotate(-ang);
+        }
+      }
+
+      function drawHand(ctx, pos, length, width, color) {
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = color || "#000";
+        ctx.moveTo(0, 0);
+        ctx.rotate(pos);
+        ctx.lineTo(0, -length);
+        ctx.stroke();
+        ctx.rotate(-pos);
+      }
+
+      function drawTime(ctx, radius) {
+        var now = new Date();
+        var hour = now.getHours();
+        var minute = now.getMinutes();
+        var second = now.getSeconds();
+
+        var digital = document.getElementById("digitalClock");
+        digital.textContent =
+          (hour < 10 ? "0" + hour : hour) + ":" +
+          (minute < 10 ? "0" + minute : minute) + ":" +
+          (second < 10 ? "0" + second : second);
+
+        hour = hour % 12;
+        hour = (hour * Math.PI / 6) +
+               (minute * Math.PI / (6 * 60)) +
+               (second * Math.PI / (360 * 60));
+        drawHand(ctx, hour, radius * 0.5, radius * 0.09);
+
+        minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+        drawHand(ctx, minute, radius * 0.75, radius * 0.09);
+
+        second = second * Math.PI / 30;
+        drawHand(ctx, second, radius * 0.85, radius * 0.03, "red");
+      }
+
+      setInterval(function() {
+        ctx.clearRect(-canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
+        drawClock();
+      }, 1000);
+    })();
+
+    // === KALENDER ===
+    (function(){
+      var now = new Date();
+      var dayNames = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+      var monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni",
+                        "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
+      var day = now.getDate();
+      var weekday = now.getDay();
+      var month = now.getMonth();
+      var year = now.getFullYear();
+
+      document.getElementById("dateToday").textContent =
+        "Heute ist " + dayNames[weekday] + ", " + day + ". " + monthNames[month] + " " + year;
+
+      var firstDay = new Date(year, month, 1).getDay();
+      var daysInMonth = new Date(year, month + 1, 0).getDate();
+      var startOffset = (firstDay + 6) % 7;
+
+      var output = "Mo Di Mi Do Fr Sa So\n";
+      var line = "";
+
+      for (var i = 0; i < startOffset; i++) {
+        line += "   ";
+      }
+
+      for (var d = 1; d <= daysInMonth; d++) {
+        line += (d < 10 ? " " : "") + d + " ";
+        if ((d + startOffset) % 7 === 0) {
+          output += line + "\n";
+          line = "";
+        }
+      }
+      output += line;
+      document.getElementById("calendarOutput").textContent = output;
+    })();
+
+    // === TIMER ===
+    function startTimer(minutes) {
+      var time = minutes * 60;
+      var interval = setInterval(function() {
+        var minutesLeft = Math.floor(time / 60);
+        var secondsLeft = time % 60;
+        document.getElementById("digitalClock").textContent =
+          (minutesLeft < 10 ? "0" + minutesLeft : minutesLeft) + ":" +
+          (secondsLeft < 10 ? "0" + secondsLeft : secondsLeft);
+        if (time <= 0) {
+          clearInterval(interval);
+        }
+        time--;
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
