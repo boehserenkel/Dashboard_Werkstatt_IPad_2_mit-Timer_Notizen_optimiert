@@ -108,8 +108,7 @@ Mo Di Mi Do Fr Sa So
   <textarea placeholder="Hier Notizen eingeben..."></textarea>
 </div>
 
-<script defer>
-document.addEventListener('DOMContentLoaded', function() {
+<script>
   const canvas = document.getElementById('clockCanvas');
   const ctx = canvas.getContext('2d');
   const radius = canvas.height / 2;
@@ -230,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Kalender mit aktuellem Tag hervorheben
-  function updateCalendar() {
+  (function updateCalendar() {
     const calendar = document.getElementById('calendarDisplay');
     const today = new Date();
     const day = today.getDate();
@@ -243,17 +242,13 @@ document.addEventListener('DOMContentLoaded', function() {
 22 23 24 25 26 27 28
 29 30 31`;
 
-    // Ersetze aktuellen Tag durch Hervorhebung (z.B. eckige Klammern)
     const dayStr = day < 10 ? ' ' + day : day.toString();
     const highlightedDay = '[' + dayStr.trim() + ']';
     calendarText = calendarText.replace(dayStr, highlightedDay);
 
     calendar.textContent = calendarText;
-  }
+  })();
 
-  updateCalendar();
-});
 </script>
-
 </body>
 </html>
