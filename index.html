@@ -5,13 +5,12 @@
 <title>Dashboard iPad 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
-  /* Hintergrundbild für die gesamte Seite */
   body {
     margin: 0; 
     padding: 0; 
     font-family: sans-serif; 
     text-align: center; 
-    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed; 
+    background: url('Werkstatt.jpg') no-repeat center center fixed; 
     background-size: cover;
     color: #222;
   }
@@ -23,48 +22,13 @@
     text-shadow: 0 0 10px red;
   }
   canvas {
-    background: rgba(255,255,255,0.9);
+    background: white;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
     width: 300px;
     height: 300px;
     display: block;
     margin: 20px auto 40px auto;
-  }
-
-  /* Kalender Styles */
-  .calendar {
-    max-width: 320px;
-    margin: 20px auto;
-    background-color: rgba(255,255,255,0.85);
-    border-radius: 10px;
-    padding: 15px 10px;
-    box-sizing: border-box;
-    font-family: monospace;
-    font-size: 14px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    color: #222;
-  }
-  .calendar strong {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-  }
-  .calendar pre {
-    margin: 0;
-    line-height: 1.4;
-    white-space: pre-wrap;
-  }
-  mark.highlight-day {
-    font-weight: bold;
-    color: #4CAF50;
-    background-color: transparent;
-  }
-
-  /* Timer Buttons */
-  .timer-btns {
-    max-width: 320px;
-    margin: 20px auto 0 auto;
   }
   .timer-btns button {
     margin: 5px;
@@ -75,46 +39,51 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .timer-btns button:hover {
-    background-color: #45a049;
   }
   #timer {
     font-size: 1.8em;
     margin-top: 10px;
     color: #333;
     font-family: monospace;
-    max-width: 320px;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: rgba(255,255,255,0.85);
-    border-radius: 8px;
-    padding: 8px 0;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
   }
-
-  /* Notizenfeld */
-  .notes-container {
+  .calendar {
     max-width: 320px;
-    margin: 30px auto 40px auto;
-    background-color: rgba(255,255,255,0.85);
+    margin: 20px auto;
+    background: rgba(255,255,255,0.85);
     border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    padding: 15px;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    font-family: monospace;
+    color: #222;
+  }
+  .calendar pre {
+    margin: 0;
+    line-height: 1.4;
+  }
+  mark.highlight-day {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 4px;
+  }
+  .notes-section {
+    max-width: 320px;
+    margin: 20px auto 40px auto;
+    background: rgba(255,255,255,0.85);
+    border-radius: 10px;
+    padding: 10px 20px;
     box-sizing: border-box;
   }
-  .notes-container textarea {
+  .notes-section textarea {
     width: 100%;
     height: 120px;
-    resize: vertical;
-    font-family: monospace;
-    font-size: 14px;
-    border-radius: 8px;
+    font-size: 1em;
+    font-family: sans-serif;
+    border-radius: 6px;
     border: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
-    background-color: #fff;
+    padding: 8px;
+    resize: vertical;
   }
 </style>
 </head>
@@ -122,6 +91,15 @@
 
 <div id="digitalClock">--:--:--</div>
 <canvas id="clockCanvas" width="300" height="300"></canvas>
+
+<div class="timer-btns">
+  <button onclick="startTimer(1)">1 Minute</button>
+  <button onclick="startTimer(2)">2 Minuten</button>
+  <button onclick="startTimer(5)">5 Minuten</button>
+  <button onclick="startTimer(10)">10 Minuten</button>
+  <button onclick="startTimer(15)">15 Minuten</button>
+</div>
+<div id="timer">00:00</div>
 
 <div class="calendar">
   <strong>Kalender</strong>
@@ -135,23 +113,13 @@ Mo Di Mi Do Fr Sa So
   </pre>
 </div>
 
-<div class="timer-btns">
-  <button onclick="startTimer(1)">1 Minute</button>
-  <button onclick="startTimer(2)">2 Minuten</button>
-  <button onclick="startTimer(5)">5 Minuten</button>
-  <button onclick="startTimer(10)">10 Minuten</button>
-  <button onclick="startTimer(15)">15 Minuten</button>
-</div>
-<div id="timer">00:00</div>
-
-<div class="notes-container">
-  <strong>Notizen</strong><br />
-  <textarea placeholder="Hier kannst du deine Notizen eingeben..."></textarea>
+<div class="notes-section">
+  <strong>Notizen</strong><br/>
+  <textarea id="notes" placeholder="Hier kannst du Notizen eingeben..."></textarea>
 </div>
 
 <script>
 window.onload = function() {
-  // Analog Uhr
   var canvas = document.getElementById('clockCanvas');
   var ctx = canvas.getContext('2d');
   var radius = canvas.height / 2;
@@ -297,6 +265,7 @@ window.onload = function() {
   }
 
   highlightToday();
+
 };
 </script>
 
