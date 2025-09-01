@@ -6,7 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
   body {
-    margin: 0; padding: 0; font-family: sans-serif; text-align: center; background: #eee;
+    margin: 0; padding: 0; font-family: sans-serif; text-align: center; 
+    /* Hintergrund mit Farbverlauf */
+    background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   #digitalClock {
     font-size: 2.5em;
@@ -31,11 +37,24 @@
     background-color: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
     box-sizing: border-box;
-  }
-  /* Nur Kalender und Timer Bereich schmaler */
-  .calendar, .timer-section {
     max-width: 320px;
     width: 90vw;
+  }
+  /* Kalenderbereich */
+  .calendar pre {
+    font-family: monospace;
+    font-size: 1em;
+    line-height: 1.5em;
+    white-space: pre-wrap;
+    text-align: center;
+  }
+  /* Markierung des heutigen Tages */
+  .today {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 3px;
+    padding: 0 4px;
+    font-weight: bold;
   }
   /* Timer Buttons */
   .timer-btns button {
@@ -47,6 +66,10 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .timer-btns button:hover {
+    background-color: #45a049;
   }
   #timer {
     font-size: 1.8em;
@@ -62,8 +85,8 @@
 <canvas id="clockCanvas" width="300" height="300"></canvas>
 
 <div class="section calendar">
-  <strong>Kalender (Platzhalter)</strong>
-  <pre>
+  <strong>Kalender</strong>
+  <pre id="calendarContent">
 Mo Di Mi Do Fr Sa So
  1  2  3  4  5  6  7
  8  9 10 11 12 13 14
@@ -78,6 +101,8 @@ Mo Di Mi Do Fr Sa So
     <button onclick="startTimer(1)">1 Minute</button>
     <button onclick="startTimer(2)">2 Minuten</button>
     <button onclick="startTimer(5)">5 Minuten</button>
+    <button onclick="startTimer(10)">10 Minuten</button>
+    <button onclick="startTimer(15)">15 Minuten</button>
   </div>
   <div id="timer">00:00</div>
 </div>
@@ -202,6 +227,59 @@ window.onload = function() {
   function padTime(time) {
     return time < 10 ? '0' + time : time;
   }
+
+  // Kalender - Heute markieren
+  function markToday() {
+    const calendarPre = document.getElementById('calendarContent');
+    let calendarText = calendarPre.textContent;
+
+    const today = new Date();
+    const day = today.getDate();
+
+    // Suche den Tag im Kalender-Text und ersetze ihn mit einer Markierung
+    // Der Kalender ist ein einfacher Text mit Zahlen, wir suchen nach dem exakten Tag als " xx" oder " x" mit Leerzeichen
+
+    // Ein regulärer Ausdruck für die Zahl als eigenständiges "Wort" (z.B. mit Leerzeichen davor und danach)
+    // Achtung: wenn der Tag am Zeilenanfang steht, ist davor ein Zeilenumbruch oder Leerzeichen.
+
+    // Hier ersetzen wir z.B. " 5 " oder " 5\n" oder " 5" am Ende etc.
+    // Um sicherzugehen, bauen wir ein Pattern mit Word Boundaries und optionalen Leerzeichen
+
+    // Wir ersetzen nur das erste Vorkommen.
+    const dayStr = day.toString();
+
+    // Pattern so, dass es die Zahl mit optionaler führender 1-Leerzeichen bei einstelligen Zahlen findet,
+    // Beispiel: " 5 ", " 5\n", " 5" am Zeilenende oder am Anfang nach \n
+    // Da der Kalender Tage rechtsbündig mit 2 Zeichen darstellt, brauchen wir auch führendes Leerzeichen.
+
+    // Wir suchen das Muster für Tag mit führendem Leerzeichen (da im Kalender so formatiert) und evtl. folgendem Leerzeichen oder Zeilenumbruch
+    // Also z.B. " 5" oder " 5 "
+    // Mit Ersetzung auf span mit Klasse .today
+
+    // Pattern für ein- oder zweistellige Zahl mit führendem Leerzeichen
+    const regex = new RegExp("(\\s)" + dayStr + "(\\s)", "m");
+
+    // Ersetzen
+    // Neue Darstellung: das <span class='today'>day</span> - wir müssen hier HTML in <pre> einfügen
+    // Aber innerText/TextContent ignoriert HTML, daher ersetzen wir calendarPre.innerHTML
+
+    // Deshalb holen wir zuerst den Text, wandeln in HTML um, ersetzen dort die Zahl
+
+    // Vorsichtig: wir müssen den Kalender-Inhalt als HTML darstellen mit <span>
+    // Dazu wandeln wir Leerzeichen in &nbsp; um, damit der Abstand erhalten bleibt
+
+    let html = calendarText.replace(/ /g, "&nbsp;");
+    // Ersetze die Tageszahl (z.B. &nbsp;5&nbsp;) mit markiertem Span
+    // Verwende regex auf html mit &nbsp; statt Leerzeichen
+
+    const regexHtml = new RegExp("(&nbsp;)" + dayStr + "(&nbsp;)", "m");
+    html = html.replace(regexHtml, "$1<span class='today'>" + dayStr + "</span>$2");
+
+    calendarPre.innerHTML = html;
+  }
+
+  markToday();
+
 };
 </script>
 
