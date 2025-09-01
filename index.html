@@ -5,8 +5,15 @@
 <title>Dashboard iPad 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
+  /* Hintergrundbild für die gesamte Seite */
   body {
-    margin: 0; padding: 0; font-family: sans-serif; text-align: center; background: #eee;
+    margin: 0; 
+    padding: 0; 
+    font-family: sans-serif; 
+    text-align: center; 
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed; 
+    background-size: cover;
+    color: #222;
   }
   #digitalClock {
     font-size: 2.5em;
@@ -16,7 +23,7 @@
     text-shadow: 0 0 10px red;
   }
   canvas {
-    background: white;
+    background: rgba(255,255,255,0.9);
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
     width: 300px;
@@ -29,13 +36,14 @@
   .calendar {
     max-width: 320px;
     margin: 20px auto;
-    background-color: rgba(255,255,255,0.9);
+    background-color: rgba(255,255,255,0.85);
     border-radius: 10px;
     padding: 15px 10px;
     box-sizing: border-box;
     font-family: monospace;
     font-size: 14px;
     box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    color: #222;
   }
   .calendar strong {
     display: block;
@@ -45,10 +53,12 @@
   .calendar pre {
     margin: 0;
     line-height: 1.4;
+    white-space: pre-wrap;
   }
-  .highlight-day {
+  mark.highlight-day {
     font-weight: bold;
     color: #4CAF50;
+    background-color: transparent;
   }
 
   /* Timer Buttons */
@@ -65,6 +75,10 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .timer-btns button:hover {
+    background-color: #45a049;
   }
   #timer {
     font-size: 1.8em;
@@ -74,6 +88,33 @@
     max-width: 320px;
     margin-left: auto;
     margin-right: auto;
+    background-color: rgba(255,255,255,0.85);
+    border-radius: 8px;
+    padding: 8px 0;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  }
+
+  /* Notizenfeld */
+  .notes-container {
+    max-width: 320px;
+    margin: 30px auto 40px auto;
+    background-color: rgba(255,255,255,0.85);
+    border-radius: 10px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    padding: 15px;
+    box-sizing: border-box;
+  }
+  .notes-container textarea {
+    width: 100%;
+    height: 120px;
+    resize: vertical;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #fff;
   }
 </style>
 </head>
@@ -102,6 +143,11 @@ Mo Di Mi Do Fr Sa So
   <button onclick="startTimer(15)">15 Minuten</button>
 </div>
 <div id="timer">00:00</div>
+
+<div class="notes-container">
+  <strong>Notizen</strong><br />
+  <textarea placeholder="Hier kannst du deine Notizen eingeben..."></textarea>
+</div>
 
 <script>
 window.onload = function() {
@@ -240,23 +286,9 @@ window.onload = function() {
 22 23 24 25 26 27 28
 29 30 31`;
 
-    // Ersetze den Tag mit einer Hervorhebung (span mit Klasse)
-    // Da es ein <pre> ist, nutzen wir einfache String-Ersatz-Strategie
-
-    // Wir suchen nach dem Tag als Zahl mit optionalem Leerzeichen davor (1 oder 2 Zeichen breit)
-    // Sicherstellen, dass nur der heutige Tag ersetzt wird (genaues match)
-    // Zum Hervorheben benutze ANSI-ähnliche Markierung via <span> - funktioniert nicht in <pre> ohne CSS.
-    // Stattdessen ersetzen wir einfach die Zahl mit einem fett gedruckten Text via Unicode Fettdigit.
-
-    // Einfachheitshalber ersetzen wir die Zahl mit einem HTML <mark> Tag, das per CSS fett und grün ist.
-    // Damit funktioniert es im <pre> auch.
-
-    // Wir müssen also den innerHTML verwenden (nicht textContent), also bauen wir neuen HTML-String.
-
-    // Split Text nach Zeilen
+    // Ersetze den Tag mit einer Hervorhebung via <mark> Tag
     var lines = text.split('\n');
     for (var i = 0; i < lines.length; i++) {
-      // Ersetze den Tag in jeder Zeile, falls vorhanden
       var regex = new RegExp('\\b' + day + '\\b');
       lines[i] = lines[i].replace(regex, '<mark class="highlight-day">' + day + '</mark>');
     }
