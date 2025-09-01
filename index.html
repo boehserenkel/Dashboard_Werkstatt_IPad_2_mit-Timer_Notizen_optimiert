@@ -2,11 +2,25 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<title>Test Uhr & Timer</title>
+<title>Uhr & Timer Test</title>
 <style>
-  body { text-align: center; font-family: monospace; background: #eee; }
-  #digitalClock { font-size: 2em; color: red; margin: 20px; }
-  canvas { background: white; border-radius: 50%; margin: 20px auto; display: block; }
+  body {
+    text-align: center;
+    font-family: monospace;
+    background: #eee;
+    margin: 0; padding: 20px;
+  }
+  #digitalClock {
+    font-size: 2em;
+    color: red;
+    margin: 20px 0;
+  }
+  canvas {
+    background: white;
+    border-radius: 50%;
+    margin: 0 auto 30px auto;
+    display: block;
+  }
   .timer-btns button {
     margin: 5px;
     padding: 10px 15px;
@@ -21,7 +35,6 @@
     font-size: 1.8em;
     margin-top: 10px;
     color: #333;
-    font-family: monospace;
   }
 </style>
 </head>
@@ -40,7 +53,6 @@
 <div id="timer">00:00</div>
 
 <script>
-window.onload = function() {
   const canvas = document.getElementById('clockCanvas');
   const ctx = canvas.getContext('2d');
   const radius = canvas.height / 2;
@@ -50,6 +62,7 @@ window.onload = function() {
   function drawClock() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Uhrblatt
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius * 0.9, 0, 2 * Math.PI);
     ctx.fillStyle = 'white';
@@ -58,6 +71,7 @@ window.onload = function() {
     ctx.strokeStyle = '#333';
     ctx.stroke();
 
+    // Mittelpunkt
     ctx.beginPath();
     ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
     ctx.fillStyle = '#333';
@@ -87,15 +101,19 @@ window.onload = function() {
     const minute = now.getMinutes();
     const second = now.getSeconds();
 
+    // Stundenzeiger
     const hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
     drawHand(hourAngle, radius * 0.5, 8);
 
+    // Minutenzeiger
     const minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
     drawHand(minuteAngle, radius * 0.7, 6);
 
+    // Sekundenzeiger (rot)
     const secondAngle = (second * Math.PI / 30) - Math.PI/2;
     drawHand(secondAngle, radius * 0.85, 2, 'red');
 
+    // Digitale Uhr aktualisieren
     document.getElementById('digitalClock').textContent =
       (now.getHours() < 10 ? '0' + now.getHours() : now.getHours()) + ':' +
       (minute < 10 ? '0' + minute : minute) + ':' +
@@ -114,44 +132,43 @@ window.onload = function() {
 
   drawClock();
   setInterval(drawClock, 1000);
-};
 
-// Timer
-let countdownInterval = null;
+  // Timer
+  let countdownInterval = null;
 
-function startTimer(minutes) {
-  if (countdownInterval) {
-    clearInterval(countdownInterval);
-    countdownInterval = null;
-  }
-
-  let totalSeconds = minutes * 60;
-  updateTimerDisplay(totalSeconds);
-
-  countdownInterval = setInterval(() => {
-    totalSeconds--;
-
-    if (totalSeconds < 0) {
+  function startTimer(minutes) {
+    if (countdownInterval) {
       clearInterval(countdownInterval);
       countdownInterval = null;
-      alert("Zeit ist um!");
-      document.getElementById('timer').textContent = '00:00';
-      return;
     }
 
+    let totalSeconds = minutes * 60;
     updateTimerDisplay(totalSeconds);
-  }, 1000);
-}
 
-function updateTimerDisplay(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  document.getElementById('timer').textContent = `${pad(mins)}:${pad(secs)}`;
-}
+    countdownInterval = setInterval(() => {
+      totalSeconds--;
 
-function pad(num) {
-  return num < 10 ? '0' + num : num;
-}
+      if (totalSeconds < 0) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+        alert("Zeit ist um!");
+        document.getElementById('timer').textContent = '00:00';
+        return;
+      }
+
+      updateTimerDisplay(totalSeconds);
+    }, 1000);
+  }
+
+  function updateTimerDisplay(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    document.getElementById('timer').textContent = `${pad(mins)}:${pad(secs)}`;
+  }
+
+  function pad(num) {
+    return num < 10 ? '0' + num : num;
+  }
 </script>
 
 </body>
