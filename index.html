@@ -5,16 +5,9 @@
 <title>Dashboard iPad 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
-  /* Gesamt-Hintergrund */
   body {
-    margin: 0; padding: 0;
-    font-family: sans-serif;
-    text-align: center;
-    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
-    background-size: cover;
-    color: #222;
+    margin: 0; padding: 0; font-family: sans-serif; text-align: center; background: #eee;
   }
-
   #digitalClock {
     font-size: 2.5em;
     font-family: monospace;
@@ -22,7 +15,6 @@
     margin: 20px 0 0 0;
     text-shadow: 0 0 10px red;
   }
-
   canvas {
     background: white;
     border-radius: 50%;
@@ -33,54 +25,55 @@
     margin: 20px auto 40px auto;
   }
 
+  /* Kalender Styles */
+  .calendar {
+    max-width: 320px;
+    margin: 20px auto;
+    background-color: rgba(255,255,255,0.9);
+    border-radius: 10px;
+    padding: 15px 10px;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 14px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  }
+  .calendar strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+  }
+  .calendar pre {
+    margin: 0;
+    line-height: 1.4;
+  }
+  .highlight-day {
+    font-weight: bold;
+    color: #4CAF50;
+  }
+
   /* Timer Buttons */
   .timer-btns {
-    margin-bottom: 10px;
+    max-width: 320px;
+    margin: 20px auto 0 auto;
   }
   .timer-btns button {
-    margin: 5px 8px;
-    padding: 10px 18px;
+    margin: 5px;
+    padding: 10px 15px;
     font-size: 16px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
   }
-  .timer-btns button:hover {
-    background-color: #45a049;
-  }
-
   #timer {
     font-size: 1.8em;
     margin-top: 10px;
     color: #333;
     font-family: monospace;
-  }
-
-  /* Kalenderbereich kompakt */
-  .calendar {
-    display: inline-block;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    padding: 10px 15px;
-    margin: 20px auto 40px auto;
-    box-sizing: border-box;
-    text-align: left;
-    font-family: monospace;
-    white-space: pre;
-    line-height: 1.4;
-    font-size: 1.1em;
-    user-select: none;
-  }
-
-  /* Hervorhebung des heutigen Tages */
-  .calendar .today {
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 4px;
-    padding: 0 4px;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
   }
 </style>
 </head>
@@ -89,16 +82,7 @@
 <div id="digitalClock">--:--:--</div>
 <canvas id="clockCanvas" width="300" height="300"></canvas>
 
-<div class="timer-btns">
-  <button onclick="startTimer(1)">1 Minute</button>
-  <button onclick="startTimer(2)">2 Minuten</button>
-  <button onclick="startTimer(5)">5 Minuten</button>
-  <button onclick="startTimer(10)">10 Minuten</button>
-  <button onclick="startTimer(15)">15 Minuten</button>
-</div>
-<div id="timer">00:00</div>
-
-<div class="calendar" id="calendar">
+<div class="calendar">
   <strong>Kalender</strong>
   <pre id="calendarContent">
 Mo Di Mi Do Fr Sa So
@@ -110,9 +94,18 @@ Mo Di Mi Do Fr Sa So
   </pre>
 </div>
 
+<div class="timer-btns">
+  <button onclick="startTimer(1)">1 Minute</button>
+  <button onclick="startTimer(2)">2 Minuten</button>
+  <button onclick="startTimer(5)">5 Minuten</button>
+  <button onclick="startTimer(10)">10 Minuten</button>
+  <button onclick="startTimer(15)">15 Minuten</button>
+</div>
+<div id="timer">00:00</div>
+
 <script>
 window.onload = function() {
-  // Uhr
+  // Analog Uhr
   var canvas = document.getElementById('clockCanvas');
   var ctx = canvas.getContext('2d');
   var radius = canvas.height / 2;
@@ -232,36 +225,46 @@ window.onload = function() {
     return time < 10 ? '0' + time : time;
   }
 
-  // Kalender mit heutigem Tag hervorheben
+  // Kalender aktueller Tag markieren
   function highlightToday() {
     var calendarPre = document.getElementById('calendarContent');
-    var today = new Date();
-    var day = today.getDate();
+    var now = new Date();
+    var day = now.getDate();
 
-    // Kalender-Text in Zeilen splitten
-    var lines = calendarPre.textContent.split('\n');
+    // Ursprünglichen Kalendertext
+    var text = 
+`Mo Di Mi Do Fr Sa So
+ 1  2  3  4  5  6  7
+ 8  9 10 11 12 13 14
+15 16 17 18 19 20 21
+22 23 24 25 26 27 28
+29 30 31`;
 
-    // Überspringe die erste Zeile (Wochentage)
-    for (var i = 1; i < lines.length; i++) {
-      // Ersetze den Tag mit Highlight, wenn gefunden
-      // Wir splitten die Zeile in einzelne Tage (per Leerzeichen)
-      var days = lines[i].split(/(\s+)/); // Split mit Whitespaces behalten
+    // Ersetze den Tag mit einer Hervorhebung (span mit Klasse)
+    // Da es ein <pre> ist, nutzen wir einfache String-Ersatz-Strategie
 
-      for (var j = 0; j < days.length; j++) {
-        if (parseInt(days[j]) === day) {
-          days[j] = `<span class="today">${days[j].padStart(2, ' ')}</span>`;
-        }
-      }
+    // Wir suchen nach dem Tag als Zahl mit optionalem Leerzeichen davor (1 oder 2 Zeichen breit)
+    // Sicherstellen, dass nur der heutige Tag ersetzt wird (genaues match)
+    // Zum Hervorheben benutze ANSI-ähnliche Markierung via <span> - funktioniert nicht in <pre> ohne CSS.
+    // Stattdessen ersetzen wir einfach die Zahl mit einem fett gedruckten Text via Unicode Fettdigit.
 
-      // Zeile wieder zusammenfügen
-      lines[i] = days.join('');
+    // Einfachheitshalber ersetzen wir die Zahl mit einem HTML <mark> Tag, das per CSS fett und grün ist.
+    // Damit funktioniert es im <pre> auch.
+
+    // Wir müssen also den innerHTML verwenden (nicht textContent), also bauen wir neuen HTML-String.
+
+    // Split Text nach Zeilen
+    var lines = text.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      // Ersetze den Tag in jeder Zeile, falls vorhanden
+      var regex = new RegExp('\\b' + day + '\\b');
+      lines[i] = lines[i].replace(regex, '<mark class="highlight-day">' + day + '</mark>');
     }
 
     calendarPre.innerHTML = lines.join('\n');
   }
 
   highlightToday();
-
 };
 </script>
 
