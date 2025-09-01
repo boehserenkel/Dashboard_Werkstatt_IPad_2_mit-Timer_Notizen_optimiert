@@ -4,14 +4,12 @@
 <meta charset="UTF-8" />
 <title>Dashboard iPad 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
 <style>
   html, body {
-    margin: 0; padding: 0; height: 100%; width: 100%; 
-    font-family: sans-serif; 
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    font-family: sans-serif;
     background: url('Werkstatt.jpg') no-repeat center center fixed;
     background-size: cover;
     overflow: hidden;
@@ -107,11 +105,11 @@ document.addEventListener('DOMContentLoaded', function() {
   var centerX = canvas.width / 2;
   var centerY = canvas.height / 2;
 
-  // Timer Variablen
+  var timerDisplay = document.getElementById('timer');
   var countdown;
   var isTimerRunning = false;
-  var timerDisplay = document.getElementById('timer');
 
+  // Uhr zeichnen
   function drawClock() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -131,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.fill();
 
     drawNumbers();
-
     drawHands();
   }
 
@@ -164,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var secondAngle = (second * Math.PI / 30) - Math.PI/2;
     drawHand(secondAngle, radius * 0.85, 2, 'red');
 
+    // Digitale Uhr aktualisieren
     var digital = document.getElementById('digitalClock');
     digital.textContent =
       (now.getHours() < 10 ? '0' + now.getHours() : now.getHours()) + ':' +
@@ -171,9 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
       (second < 10 ? '0' + second : second);
 
     drawCalendar(now);
-
-    // requestAnimationFrame für flüssiges Zeichnen
-    window.requestAnimationFrame(drawClock);
   }
 
   function drawHand(angle, length, width, color) {
@@ -186,8 +181,9 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.stroke();
   }
 
-  // Starte Animation
-  window.requestAnimationFrame(drawClock);
+  // Update alle 1 Sekunde
+  setInterval(drawClock, 1000);
+  drawClock();
 
   // Timer-Funktion
   function startTimer(minutes) {
@@ -239,4 +235,33 @@ document.addEventListener('DOMContentLoaded', function() {
   // Kalender zeichnen
   function drawCalendar(now) {
     var calendarEl = document.getElementById('calendarGrid');
-    var year = now.get
+    var year = now.getFullYear();
+    var month = now.getMonth();
+
+    var firstDay = new Date(year, month, 1).getDay();
+    if (firstDay === 0) firstDay = 7; // Sonntag als 7
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    var calendarStr = "Mo Di Mi Do Fr Sa So\n";
+    var dayCount = 1;
+    for (var i = 1; i <= 42; i++) {
+      if (i < firstDay || dayCount > daysInMonth) {
+        calendarStr += "   ";
+      } else {
+        if (dayCount === now.getDate()) {
+          calendarStr += "[" + (dayCount < 10 ? ' ' + dayCount : dayCount) + "]";
+        } else {
+          calendarStr += " " + (dayCount < 10 ? ' ' + dayCount : dayCount) + " ";
+        }
+        dayCount++;
+      }
+      if (i % 7 === 0) calendarStr += "\n";
+    }
+    calendarEl.innerText = calendarStr;
+  }
+
+});
+</script>
+
+</body>
+</html>
