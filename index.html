@@ -5,7 +5,6 @@
 <title>Dashboard iPad 2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
-<!-- iOS Homescreen Fullscreen -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -73,6 +72,7 @@
     font-family: monospace;
     font-size: 1.1em;
     user-select: none;
+    white-space: pre-wrap;
   }
   .current-day {
     background: #ff4444;
@@ -89,9 +89,9 @@
 <canvas id="clockCanvas" width="300" height="300"></canvas>
 
 <div class="timer-btns">
-  <button onclick="startTimer(1)">1 Minute</button>
-  <button onclick="startTimer(2)">2 Minuten</button>
-  <button onclick="startTimer(5)">5 Minuten</button>
+  <button id="timer1">1 Minute</button>
+  <button id="timer2">2 Minuten</button>
+  <button id="timer5">5 Minuten</button>
 </div>
 <div id="timer">00:00</div>
 
@@ -107,8 +107,15 @@ document.addEventListener('DOMContentLoaded', function() {
   var centerX = canvas.width / 2;
   var centerY = canvas.height / 2;
 
+  // Timer Variablen
+  var countdown;
+  var isTimerRunning = false;
+  var timerDisplay = document.getElementById('timer');
+
   function drawClock() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Uhrblatt
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius * 0.9, 0, 2 * Math.PI);
     ctx.fillStyle = 'white';
@@ -117,12 +124,14 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.strokeStyle = '#333';
     ctx.stroke();
 
+    // Mittelpunkt
     ctx.beginPath();
     ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
     ctx.fillStyle = '#333';
     ctx.fill();
 
     drawNumbers();
+
     drawHands();
   }
 
@@ -162,6 +171,9 @@ document.addEventListener('DOMContentLoaded', function() {
       (second < 10 ? '0' + second : second);
 
     drawCalendar(now);
+
+    // requestAnimationFrame für flüssiges Zeichnen
+    window.requestAnimationFrame(drawClock);
   }
 
   function drawHand(angle, length, width, color) {
@@ -174,18 +186,15 @@ document.addEventListener('DOMContentLoaded', function() {
     ctx.stroke();
   }
 
-  setInterval(drawClock, 1000);
-  drawClock();
+  // Starte Animation
+  window.requestAnimationFrame(drawClock);
 
-  // Timer
-  var countdown;
-  var isTimerRunning = false;
-
-  window.startTimer = function(minutes) {
+  // Timer-Funktion
+  function startTimer(minutes) {
     if (isTimerRunning) {
       clearInterval(countdown);
       isTimerRunning = false;
-      document.getElementById('timer').innerText = '00:00';
+      timerDisplay.innerText = '00:00';
     }
 
     var totalSeconds = minutes * 60;
@@ -200,70 +209,34 @@ document.addEventListener('DOMContentLoaded', function() {
         clearInterval(countdown);
         isTimerRunning = false;
         alert("Zeit ist um!");
-        document.getElementById('timer').innerText = '00:00';
+        timerDisplay.innerText = '00:00';
       }
     }, 1000);
-  };
+  }
 
   function updateTimerDisplay(seconds) {
     var minutes = Math.floor(seconds / 60);
     var remainingSeconds = seconds % 60;
-    document.getElementById('timer').innerText = padTime(minutes) + ":" + padTime(remainingSeconds);
+    timerDisplay.innerText = padTime(minutes) + ":" + padTime(remainingSeconds);
   }
 
   function padTime(time) {
     return time < 10 ? '0' + time : time;
   }
 
-  // Notizen mit localStorage
+  // Timer Buttons Events
+  document.getElementById('timer1').addEventListener('click', function() { startTimer(1); });
+  document.getElementById('timer2').addEventListener('click', function() { startTimer(2); });
+  document.getElementById('timer5').addEventListener('click', function() { startTimer(5); });
+
+  // Notizen speichern & laden
   var notesEl = document.getElementById('notes');
   notesEl.value = localStorage.getItem('dashboardNotes') || '';
   notesEl.addEventListener('input', function() {
     localStorage.setItem('dashboardNotes', notesEl.value);
   });
 
-  // Kalender zeichnen & aktuellen Tag hervorheben
+  // Kalender zeichnen
   function drawCalendar(now) {
     var calendarEl = document.getElementById('calendarGrid');
-    var year = now.getFullYear();
-    var month = now.getMonth();
-    var today = now.getDate();
-
-    // Erster Tag des Monats
-    var firstDay = new Date(year, month, 1);
-    var firstWeekDay = firstDay.getDay(); // 0 = Sonntag, 1 = Montag, ...
-
-    // Anzahl Tage im Monat
-    var daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Kalender als Text (Montag bis Sonntag)
-    var daysOfWeek = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-
-    var calendarText = daysOfWeek.join(' ') + '\n';
-
-    // Platzhalter für Tage vor Monatsbeginn (Sonntag=0, Montag=1)
-    var offset = firstWeekDay === 0 ? 6 : firstWeekDay - 1;
-
-    // Leerfelder vor Monatsbeginn
-    for (var i=0; i < offset; i++) {
-      calendarText += '   ';
-    }
-
-    for (var day = 1; day <= daysInMonth; day++) {
-      if (day === today) {
-        calendarText += '[' + (day < 10 ? ' ' + day : day) + '] ';
-      } else {
-        calendarText += (day < 10 ? ' ' + day : day) + '  ';
-      }
-
-      if ((day + offset) % 7 === 0) calendarText += '\n';
-    }
-
-    calendarEl.textContent = calendarText;
-  }
-
-});
-</script>
-
-</body>
-</html>
+    var year = now.get
