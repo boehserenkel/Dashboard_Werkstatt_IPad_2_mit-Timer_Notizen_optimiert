@@ -2,39 +2,85 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<title>Uhr & Timer Test</title>
+<title>Dashboard iPad 2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <style>
+  /* Gesamt-Hintergrund */
   body {
+    margin: 0; padding: 0;
+    font-family: sans-serif;
     text-align: center;
-    font-family: monospace;
-    background: #eee;
-    margin: 0; padding: 20px;
+    background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #222;
   }
+
   #digitalClock {
-    font-size: 2em;
+    font-size: 2.5em;
+    font-family: monospace;
     color: red;
-    margin: 20px 0;
+    margin: 20px 0 0 0;
+    text-shadow: 0 0 10px red;
   }
+
   canvas {
     background: white;
     border-radius: 50%;
-    margin: 0 auto 30px auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    width: 300px;
+    height: 300px;
     display: block;
+    margin: 20px auto 40px auto;
+  }
+
+  /* Timer Buttons */
+  .timer-btns {
+    margin-bottom: 10px;
   }
   .timer-btns button {
-    margin: 5px;
-    padding: 10px 15px;
+    margin: 5px 8px;
+    padding: 10px 18px;
     font-size: 16px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
+  .timer-btns button:hover {
+    background-color: #45a049;
+  }
+
   #timer {
     font-size: 1.8em;
     margin-top: 10px;
     color: #333;
+    font-family: monospace;
+  }
+
+  /* Kalenderbereich kompakt */
+  .calendar {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin: 20px auto 40px auto;
+    box-sizing: border-box;
+    text-align: left;
+    font-family: monospace;
+    white-space: pre;
+    line-height: 1.4;
+    font-size: 1.1em;
+    user-select: none;
+  }
+
+  /* Hervorhebung des heutigen Tages */
+  .calendar .today {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    padding: 0 4px;
   }
 </style>
 </head>
@@ -52,12 +98,26 @@
 </div>
 <div id="timer">00:00</div>
 
+<div class="calendar" id="calendar">
+  <strong>Kalender</strong>
+  <pre id="calendarContent">
+Mo Di Mi Do Fr Sa So
+ 1  2  3  4  5  6  7
+ 8  9 10 11 12 13 14
+15 16 17 18 19 20 21
+22 23 24 25 26 27 28
+29 30 31
+  </pre>
+</div>
+
 <script>
-  const canvas = document.getElementById('clockCanvas');
-  const ctx = canvas.getContext('2d');
-  const radius = canvas.height / 2;
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
+window.onload = function() {
+  // Uhr
+  var canvas = document.getElementById('clockCanvas');
+  var ctx = canvas.getContext('2d');
+  var radius = canvas.height / 2;
+  var centerX = canvas.width / 2;
+  var centerY = canvas.height / 2;
 
   function drawClock() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -87,34 +147,35 @@
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
 
-    for (let num = 1; num <= 12; num++) {
-      const ang = num * Math.PI / 6;
-      const x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
-      const y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
+    for (var num = 1; num <= 12; num++) {
+      var ang = num * Math.PI / 6;
+      var x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
+      var y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
       ctx.fillText(num.toString(), x, y);
     }
   }
 
   function drawHands() {
-    const now = new Date();
-    const hour = now.getHours() % 12;
-    const minute = now.getMinutes();
-    const second = now.getSeconds();
+    var now = new Date();
+    var hour = now.getHours() % 12;
+    var minute = now.getMinutes();
+    var second = now.getSeconds();
 
     // Stundenzeiger
-    const hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
+    var hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
     drawHand(hourAngle, radius * 0.5, 8);
 
     // Minutenzeiger
-    const minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
+    var minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
     drawHand(minuteAngle, radius * 0.7, 6);
 
     // Sekundenzeiger (rot)
-    const secondAngle = (second * Math.PI / 30) - Math.PI/2;
+    var secondAngle = (second * Math.PI / 30) - Math.PI/2;
     drawHand(secondAngle, radius * 0.85, 2, 'red');
 
     // Digitale Uhr aktualisieren
-    document.getElementById('digitalClock').textContent =
+    var digital = document.getElementById('digitalClock');
+    digital.textContent =
       (now.getHours() < 10 ? '0' + now.getHours() : now.getHours()) + ':' +
       (minute < 10 ? '0' + minute : minute) + ':' +
       (second < 10 ? '0' + second : second);
@@ -130,45 +191,78 @@
     ctx.stroke();
   }
 
-  drawClock();
   setInterval(drawClock, 1000);
+  drawClock();
 
   // Timer
-  let countdownInterval = null;
+  var countdown;
+  var isTimerRunning = false;
 
-  function startTimer(minutes) {
-    if (countdownInterval) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
+  window.startTimer = function(minutes) {
+    if (isTimerRunning) {
+      clearInterval(countdown);
+      isTimerRunning = false;
+      document.getElementById('timer').innerText = '00:00';
     }
 
-    let totalSeconds = minutes * 60;
+    var totalSeconds = minutes * 60;
+    isTimerRunning = true;
     updateTimerDisplay(totalSeconds);
 
-    countdownInterval = setInterval(() => {
+    countdown = setInterval(function () {
       totalSeconds--;
-
-      if (totalSeconds < 0) {
-        clearInterval(countdownInterval);
-        countdownInterval = null;
-        alert("Zeit ist um!");
-        document.getElementById('timer').textContent = '00:00';
-        return;
-      }
-
       updateTimerDisplay(totalSeconds);
+
+      if (totalSeconds <= 0) {
+        clearInterval(countdown);
+        isTimerRunning = false;
+        alert("Zeit ist um!");
+        document.getElementById('timer').innerText = '00:00';
+      }
     }, 1000);
-  }
+  };
 
   function updateTimerDisplay(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    document.getElementById('timer').textContent = `${pad(mins)}:${pad(secs)}`;
+    var minutes = Math.floor(seconds / 60);
+    var remainingSeconds = seconds % 60;
+    document.getElementById('timer').innerText = padTime(minutes) + ":" + padTime(remainingSeconds);
   }
 
-  function pad(num) {
-    return num < 10 ? '0' + num : num;
+  function padTime(time) {
+    return time < 10 ? '0' + time : time;
   }
+
+  // Kalender mit heutigem Tag hervorheben
+  function highlightToday() {
+    var calendarPre = document.getElementById('calendarContent');
+    var today = new Date();
+    var day = today.getDate();
+
+    // Kalender-Text in Zeilen splitten
+    var lines = calendarPre.textContent.split('\n');
+
+    // Überspringe die erste Zeile (Wochentage)
+    for (var i = 1; i < lines.length; i++) {
+      // Ersetze den Tag mit Highlight, wenn gefunden
+      // Wir splitten die Zeile in einzelne Tage (per Leerzeichen)
+      var days = lines[i].split(/(\s+)/); // Split mit Whitespaces behalten
+
+      for (var j = 0; j < days.length; j++) {
+        if (parseInt(days[j]) === day) {
+          days[j] = `<span class="today">${days[j].padStart(2, ' ')}</span>`;
+        }
+      }
+
+      // Zeile wieder zusammenfügen
+      lines[i] = days.join('');
+    }
+
+    calendarPre.innerHTML = lines.join('\n');
+  }
+
+  highlightToday();
+
+};
 </script>
 
 </body>
