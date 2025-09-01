@@ -300,7 +300,6 @@
   var notesTextarea = document.getElementById('notes');
   var saveBtn = document.getElementById('saveNotesBtn');
 
-  // Lade gespeicherte Notizen aus localStorage
   function loadNotes() {
     var savedNotes = localStorage.getItem('dashboardNotes');
     if(savedNotes) {
@@ -308,7 +307,6 @@
     }
   }
 
-  // Speichere Notizen in localStorage
   saveBtn.addEventListener('click', function() {
     localStorage.setItem('dashboardNotes', notesTextarea.value);
     alert('Notizen gespeichert!');
