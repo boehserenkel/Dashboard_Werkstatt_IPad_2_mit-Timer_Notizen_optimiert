@@ -2,61 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8" />
-<title>Dashboard iPad 2</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Test Uhr & Timer</title>
 <style>
-  body {
-    margin: 0; padding: 0; font-family: sans-serif; text-align: center; 
-    /* Hintergrund mit Farbverlauf */
-    background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  #digitalClock {
-    font-size: 2.5em;
-    font-family: monospace;
-    color: red;
-    margin: 20px 0 0 0;
-    text-shadow: 0 0 10px red;
-  }
-  canvas {
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    width: 300px;
-    height: 300px;
-    display: block;
-    margin: 20px auto 40px auto;
-  }
-  /* Allgemeine Style für die Bereiche */
-  .section {
-    margin: 20px auto;
-    padding: 15px 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    box-sizing: border-box;
-    max-width: 320px;
-    width: 90vw;
-  }
-  /* Kalenderbereich */
-  .calendar pre {
-    font-family: monospace;
-    font-size: 1em;
-    line-height: 1.5em;
-    white-space: pre-wrap;
-    text-align: center;
-  }
-  /* Markierung des heutigen Tages */
-  .today {
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 3px;
-    padding: 0 4px;
-    font-weight: bold;
-  }
-  /* Timer Buttons */
+  body { text-align: center; font-family: monospace; background: #eee; }
+  #digitalClock { font-size: 2em; color: red; margin: 20px; }
+  canvas { background: white; border-radius: 50%; margin: 20px auto; display: block; }
   .timer-btns button {
     margin: 5px;
     padding: 10px 15px;
@@ -66,10 +16,6 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .timer-btns button:hover {
-    background-color: #45a049;
   }
   #timer {
     font-size: 1.8em;
@@ -84,41 +30,26 @@
 <div id="digitalClock">--:--:--</div>
 <canvas id="clockCanvas" width="300" height="300"></canvas>
 
-<div class="section calendar">
-  <strong>Kalender</strong>
-  <pre id="calendarContent">
-Mo Di Mi Do Fr Sa So
- 1  2  3  4  5  6  7
- 8  9 10 11 12 13 14
-15 16 17 18 19 20 21
-22 23 24 25 26 27 28
-29 30 31
-  </pre>
+<div class="timer-btns">
+  <button onclick="startTimer(1)">1 Minute</button>
+  <button onclick="startTimer(2)">2 Minuten</button>
+  <button onclick="startTimer(5)">5 Minuten</button>
+  <button onclick="startTimer(10)">10 Minuten</button>
+  <button onclick="startTimer(15)">15 Minuten</button>
 </div>
-
-<div class="section timer-section">
-  <div class="timer-btns">
-    <button onclick="startTimer(1)">1 Minute</button>
-    <button onclick="startTimer(2)">2 Minuten</button>
-    <button onclick="startTimer(5)">5 Minuten</button>
-    <button onclick="startTimer(10)">10 Minuten</button>
-    <button onclick="startTimer(15)">15 Minuten</button>
-  </div>
-  <div id="timer">00:00</div>
-</div>
+<div id="timer">00:00</div>
 
 <script>
 window.onload = function() {
-  var canvas = document.getElementById('clockCanvas');
-  var ctx = canvas.getContext('2d');
-  var radius = canvas.height / 2;
-  var centerX = canvas.width / 2;
-  var centerY = canvas.height / 2;
+  const canvas = document.getElementById('clockCanvas');
+  const ctx = canvas.getContext('2d');
+  const radius = canvas.height / 2;
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
 
   function drawClock() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Uhrblatt
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius * 0.9, 0, 2 * Math.PI);
     ctx.fillStyle = 'white';
@@ -127,7 +58,6 @@ window.onload = function() {
     ctx.strokeStyle = '#333';
     ctx.stroke();
 
-    // Mittelpunkt
     ctx.beginPath();
     ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
     ctx.fillStyle = '#333';
@@ -143,35 +73,30 @@ window.onload = function() {
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
 
-    for (var num = 1; num <= 12; num++) {
-      var ang = num * Math.PI / 6;
-      var x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
-      var y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
+    for (let num = 1; num <= 12; num++) {
+      const ang = num * Math.PI / 6;
+      const x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
+      const y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
       ctx.fillText(num.toString(), x, y);
     }
   }
 
   function drawHands() {
-    var now = new Date();
-    var hour = now.getHours() % 12;
-    var minute = now.getMinutes();
-    var second = now.getSeconds();
+    const now = new Date();
+    const hour = now.getHours() % 12;
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
 
-    // Stundenzeiger
-    var hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
+    const hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
     drawHand(hourAngle, radius * 0.5, 8);
 
-    // Minutenzeiger
-    var minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
+    const minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
     drawHand(minuteAngle, radius * 0.7, 6);
 
-    // Sekundenzeiger (rot)
-    var secondAngle = (second * Math.PI / 30) - Math.PI/2;
+    const secondAngle = (second * Math.PI / 30) - Math.PI/2;
     drawHand(secondAngle, radius * 0.85, 2, 'red');
 
-    // Digitale Uhr aktualisieren
-    var digital = document.getElementById('digitalClock');
-    digital.textContent =
+    document.getElementById('digitalClock').textContent =
       (now.getHours() < 10 ? '0' + now.getHours() : now.getHours()) + ':' +
       (minute < 10 ? '0' + minute : minute) + ':' +
       (second < 10 ? '0' + second : second);
@@ -187,100 +112,46 @@ window.onload = function() {
     ctx.stroke();
   }
 
-  setInterval(drawClock, 1000);
   drawClock();
+  setInterval(drawClock, 1000);
+};
 
-  // Timer
-  var countdown;
-  var isTimerRunning = false;
+// Timer
+let countdownInterval = null;
 
-  window.startTimer = function(minutes) {
-    if (isTimerRunning) {
-      clearInterval(countdown);
-      isTimerRunning = false;
-      document.getElementById('timer').innerText = '00:00';
+function startTimer(minutes) {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+
+  let totalSeconds = minutes * 60;
+  updateTimerDisplay(totalSeconds);
+
+  countdownInterval = setInterval(() => {
+    totalSeconds--;
+
+    if (totalSeconds < 0) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+      alert("Zeit ist um!");
+      document.getElementById('timer').textContent = '00:00';
+      return;
     }
 
-    var totalSeconds = minutes * 60;
-    isTimerRunning = true;
     updateTimerDisplay(totalSeconds);
+  }, 1000);
+}
 
-    countdown = setInterval(function () {
-      totalSeconds--;
-      updateTimerDisplay(totalSeconds);
+function updateTimerDisplay(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  document.getElementById('timer').textContent = `${pad(mins)}:${pad(secs)}`;
+}
 
-      if (totalSeconds <= 0) {
-        clearInterval(countdown);
-        isTimerRunning = false;
-        alert("Zeit ist um!");
-        document.getElementById('timer').innerText = '00:00';
-      }
-    }, 1000);
-  };
-
-  function updateTimerDisplay(seconds) {
-    var minutes = Math.floor(seconds / 60);
-    var remainingSeconds = seconds % 60;
-    document.getElementById('timer').innerText = padTime(minutes) + ":" + padTime(remainingSeconds);
-  }
-
-  function padTime(time) {
-    return time < 10 ? '0' + time : time;
-  }
-
-  // Kalender - Heute markieren
-  function markToday() {
-    const calendarPre = document.getElementById('calendarContent');
-    let calendarText = calendarPre.textContent;
-
-    const today = new Date();
-    const day = today.getDate();
-
-    // Suche den Tag im Kalender-Text und ersetze ihn mit einer Markierung
-    // Der Kalender ist ein einfacher Text mit Zahlen, wir suchen nach dem exakten Tag als " xx" oder " x" mit Leerzeichen
-
-    // Ein regulärer Ausdruck für die Zahl als eigenständiges "Wort" (z.B. mit Leerzeichen davor und danach)
-    // Achtung: wenn der Tag am Zeilenanfang steht, ist davor ein Zeilenumbruch oder Leerzeichen.
-
-    // Hier ersetzen wir z.B. " 5 " oder " 5\n" oder " 5" am Ende etc.
-    // Um sicherzugehen, bauen wir ein Pattern mit Word Boundaries und optionalen Leerzeichen
-
-    // Wir ersetzen nur das erste Vorkommen.
-    const dayStr = day.toString();
-
-    // Pattern so, dass es die Zahl mit optionaler führender 1-Leerzeichen bei einstelligen Zahlen findet,
-    // Beispiel: " 5 ", " 5\n", " 5" am Zeilenende oder am Anfang nach \n
-    // Da der Kalender Tage rechtsbündig mit 2 Zeichen darstellt, brauchen wir auch führendes Leerzeichen.
-
-    // Wir suchen das Muster für Tag mit führendem Leerzeichen (da im Kalender so formatiert) und evtl. folgendem Leerzeichen oder Zeilenumbruch
-    // Also z.B. " 5" oder " 5 "
-    // Mit Ersetzung auf span mit Klasse .today
-
-    // Pattern für ein- oder zweistellige Zahl mit führendem Leerzeichen
-    const regex = new RegExp("(\\s)" + dayStr + "(\\s)", "m");
-
-    // Ersetzen
-    // Neue Darstellung: das <span class='today'>day</span> - wir müssen hier HTML in <pre> einfügen
-    // Aber innerText/TextContent ignoriert HTML, daher ersetzen wir calendarPre.innerHTML
-
-    // Deshalb holen wir zuerst den Text, wandeln in HTML um, ersetzen dort die Zahl
-
-    // Vorsichtig: wir müssen den Kalender-Inhalt als HTML darstellen mit <span>
-    // Dazu wandeln wir Leerzeichen in &nbsp; um, damit der Abstand erhalten bleibt
-
-    let html = calendarText.replace(/ /g, "&nbsp;");
-    // Ersetze die Tageszahl (z.B. &nbsp;5&nbsp;) mit markiertem Span
-    // Verwende regex auf html mit &nbsp; statt Leerzeichen
-
-    const regexHtml = new RegExp("(&nbsp;)" + dayStr + "(&nbsp;)", "m");
-    html = html.replace(regexHtml, "$1<span class='today'>" + dayStr + "</span>$2");
-
-    calendarPre.innerHTML = html;
-  }
-
-  markToday();
-
-};
+function pad(num) {
+  return num < 10 ? '0' + num : num;
+}
 </script>
 
 </body>
