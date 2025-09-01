@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <title>Dashboard iPad 2</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <style>
   html, body {
     margin: 0; padding: 0; height: 100%; width: 100%;
     overflow: hidden;
-    font-family: sans-serif; text-align: center;
+    font-family: sans-serif;
+    text-align: center;
     background: url('Werkstatt.jpg') no-repeat center center fixed;
     background-size: cover;
   }
@@ -18,17 +19,17 @@
     font-size: 2.5em;
     font-family: monospace;
     color: red;
-    margin: 20px 0 0 0;
+    margin: 15px 0 0 0;
     text-shadow: 0 0 10px red;
   }
   canvas {
     background: white;
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    width: 300px;
-    height: 300px;
+    width: 280px;
+    height: 280px;
     display: block;
-    margin: 20px auto 40px auto;
+    margin: 15px auto 30px auto;
   }
   .timer-btns button {
     margin: 5px;
@@ -48,19 +49,20 @@
   }
   .calendar {
     max-width: 90vw;
-    margin: 0 auto 20px auto;
-    background: rgba(255,255,255,0.8);
-    padding: 10px;
+    margin: 10px auto 20px auto;
+    background: rgba(255,255,255,0.85);
+    padding: 12px;
     border-radius: 10px;
     font-family: monospace;
     white-space: pre;
+    line-height: 1.4;
   }
 </style>
 </head>
 <body>
 
 <div id="digitalClock">--:--:--</div>
-<canvas id="clockCanvas" width="300" height="300"></canvas>
+<canvas id="clockCanvas" width="280" height="280"></canvas>
 
 <div class="timer-btns">
   <button onclick="startTimer(1)">1 Minute</button>
@@ -72,12 +74,12 @@
 <div class="calendar" id="calendarDisplay"></div>
 
 <script>
-(() => {
-  const canvas = document.getElementById('clockCanvas');
-  const ctx = canvas.getContext('2d');
-  const radius = canvas.height / 2;
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
+(function() {
+  var canvas = document.getElementById('clockCanvas');
+  var ctx = canvas.getContext('2d');
+  var radius = canvas.height / 2;
+  var centerX = canvas.width / 2;
+  var centerY = canvas.height / 2;
 
   function drawClock() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -107,34 +109,34 @@
     ctx.textBaseline = "middle";
     ctx.textAlign = "center";
 
-    for (let num = 1; num <= 12; num++) {
-      let ang = num * Math.PI / 6;
-      let x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
-      let y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
+    for (var num = 1; num <= 12; num++) {
+      var ang = num * Math.PI / 6;
+      var x = centerX + Math.cos(ang - Math.PI/2) * radius * 0.75;
+      var y = centerY + Math.sin(ang - Math.PI/2) * radius * 0.75;
       ctx.fillText(num.toString(), x, y);
     }
   }
 
   function drawHands() {
-    const now = new Date();
-    const hour = now.getHours() % 12;
-    const minute = now.getMinutes();
-    const second = now.getSeconds();
+    var now = new Date();
+    var hour = now.getHours() % 12;
+    var minute = now.getMinutes();
+    var second = now.getSeconds();
 
     // Stundenzeiger
-    const hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
+    var hourAngle = ((hour + minute / 60) * Math.PI / 6) - Math.PI/2;
     drawHand(hourAngle, radius * 0.5, 8);
 
     // Minutenzeiger
-    const minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
+    var minuteAngle = (minute * Math.PI / 30) - Math.PI/2;
     drawHand(minuteAngle, radius * 0.7, 6);
 
     // Sekundenzeiger (rot)
-    const secondAngle = (second * Math.PI / 30) - Math.PI/2;
+    var secondAngle = (second * Math.PI / 30) - Math.PI/2;
     drawHand(secondAngle, radius * 0.85, 2, 'red');
 
     // Digitale Uhr aktualisieren
-    const digital = document.getElementById('digitalClock');
+    var digital = document.getElementById('digitalClock');
     digital.textContent =
       (now.getHours() < 10 ? '0' + now.getHours() : now.getHours()) + ':' +
       (minute < 10 ? '0' + minute : minute) + ':' +
@@ -151,13 +153,12 @@
     ctx.stroke();
   }
 
-  // Starte Clock Animation
   setInterval(drawClock, 1000);
   drawClock();
 
-  // Timer-Funktion
-  let countdown;
-  let isTimerRunning = false;
+  // Timer
+  var countdown;
+  var isTimerRunning = false;
 
   window.startTimer = function(minutes) {
     if (isTimerRunning) {
@@ -166,11 +167,11 @@
       document.getElementById('timer').innerText = '00:00';
     }
 
-    let totalSeconds = minutes * 60;
+    var totalSeconds = minutes * 60;
     isTimerRunning = true;
     updateTimerDisplay(totalSeconds);
 
-    countdown = setInterval(() => {
+    countdown = setInterval(function () {
       totalSeconds--;
       updateTimerDisplay(totalSeconds);
 
@@ -184,8 +185,8 @@
   };
 
   function updateTimerDisplay(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+    var minutes = Math.floor(seconds / 60);
+    var remainingSeconds = seconds % 60;
     document.getElementById('timer').innerText = padTime(minutes) + ":" + padTime(remainingSeconds);
   }
 
@@ -193,36 +194,35 @@
     return time < 10 ? '0' + time : time;
   }
 
-  // Kalender rendern
+  // Kalender mit aktuellem Tag
   function renderCalendar() {
-    const calendar = document.getElementById('calendarDisplay');
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const today = now.getDate();
+    var calendar = document.getElementById('calendarDisplay');
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth();
+    var today = now.getDate();
 
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startWeekday = firstDay.getDay(); // 0=Sonntag
+    var firstDay = new Date(year, month, 1);
+    var lastDay = new Date(year, month + 1, 0);
+    var daysInMonth = lastDay.getDate();
+    var startWeekday = firstDay.getDay(); // 0=Sonntag
 
-    const weekHeader = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+    var weekHeader = ['Mo','Di','Mi','Do','Fr','Sa','So'];
 
-    let weeks = [];
-    let week = [];
+    var weeks = [];
+    var week = [];
 
-    // Startoffset anpassen (Mo=0)
-    let dayOffset = (startWeekday === 0) ? 6 : startWeekday - 1;
+    // Startoffset für Montag
+    var dayOffset = (startWeekday === 0) ? 6 : startWeekday - 1;
 
-    // Leere Tage am Anfang
-    for(let i=0; i<dayOffset; i++) {
+    for(var i=0; i<dayOffset; i++) {
       week.push('  ');
     }
 
-    for(let d=1; d<=daysInMonth; d++) {
-      let dayStr = (d < 10 ? ' ' + d : d.toString());
+    for(var d=1; d<=daysInMonth; d++) {
+      var dayStr = (d < 10 ? ' ' + d : d.toString());
       if(d === today) {
-        dayStr = '[' + (d < 10 ? ' ' + d : d) + ']'; // Heute markieren
+        dayStr = '[' + (d < 10 ? ' ' + d : d) + ']';
       }
       week.push(dayStr);
       if(week.length === 7) {
@@ -238,8 +238,8 @@
       weeks.push(week);
     }
 
-    let calendarText = weekHeader.join(' ') + '\n';
-    weeks.forEach(w => {
+    var calendarText = weekHeader.join(' ') + '\n';
+    weeks.forEach(function(w) {
       calendarText += w.join(' ') + '\n';
     });
 
